@@ -88,6 +88,13 @@ func IncrCounter(name string) {
 	metricsMu.Unlock()
 }
 
+// Increment an integer counter
+func CounterAdd(name string, val int) {
+	metricsMu.Lock()
+	snapshot.Ints[name] = snapshot.Ints[name] + uint64(val)
+	metricsMu.Unlock()
+}
+
 // Add value to a histogram
 func UpdateHistogram(name string, value float64) {
 	metricsMu.Lock()
@@ -114,9 +121,7 @@ func RunMetricsHeartbeat(maxHistory int, tick time.Duration) {
 		curSnap.Ts = n.UnixNano()
 
 		for _, mfn := range metfuncs {
-			//metricsMu.Unlock() ??
 			mfn(curSnap)
-			//metricsMu.Lock()
 		}
 
 		swapMetrics(maxHistory, n)
